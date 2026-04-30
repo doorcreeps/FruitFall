@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Фруктовое Слияние | Бросок при отпускании</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
+        
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
+        }
+
+        :root {
+            --bg-dark: #0a0518;
+            --bg-glow: #1e0b3a;
+            --gold: #ffdd7e;
+            --gold-glow: #ffb347;
+            --accent-purple: #b87cff;
+            --fusion: #ff70a6;
+            --shadow-strong: rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 20%, #1f0c40, #040010);
+            font-family: 'Nunito', sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* stars animation */
+        .stars {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            animation: starTwinkle 3s infinite alternate;
+        }
+        @keyframes starTwinkle {
+            0% { opacity: 0.1; transform: scale(0.7);}
+            100% { opacity: 0.9; transform: scale(1.2);}
+        }
+
+        /* layout container */
+        .game-hub {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 22px;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* desktop sidebar */
+        .info-panel {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            backdrop-filter: blur(12px);
+        }
+        .stat-card {
+            background: rgba(20, 10, 40, 0.65);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 215, 150, 0.3);
+            border-radius: 32px;
+            padding: 18px 12px;
+            text-align: center;
+            transition: 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        .stat-label {
+            font-family: 'Fredoka One', cursive;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .score-value {
+            font-family: 'Fredoka One', cursive;
+            font-size: 48px;
+            color: var(--gold);
+            text-shadow: 0 0 12px #ffb34780;
+            line-height: 1;
+        }
+        .best-value {
+            font-family: 'Fredoka One', cursive;
+            font-size: 36px;
+            color: #ffbc6e;
+        }
+        .next-fruit {
+            font-size: 52px;
+            filter: drop-shadow(0 0 12px #ffd966);
+            background: rgba(0,0,0,0.2);
+            border-radius: 60px;
+            padding: 6px;
+        }
+        .legend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            background: rgba(255,255,240,0.05);
+            padding: 5px 12px;
+            border-radius: 40px;
+            color: #ffecbb;
+        }
+        .restart-btn {
+            background: linear-gradient(145deg, #ff7b89, #c35eff);
+            border: none;
+            font-family: 'Fredoka One', cursive;
+            font-size: 18px;
+            padding: 12px;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 0 0 #5a2a8a;
+            transition: 0.07s linear;
+        }
+        .restart-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 0 #5a2a8a;
+        }
+
+        /* canvas wrapper */
+        .canvas-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        canvas {
+            display: block;
+            border-radius: 48px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(255,215,0,0.2);
+            cursor: crosshair;
+            background: #110c23;
+            transition: all 0.1s;
+        }
+
+        /* game over overlay */
+        .gameover-pane {
+            position: absolute;
+            inset: 0;
+            background: rgba(8, 2, 24, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s ease;
+            z-index: 20;
+        }
+        .gameover-pane.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .gameover-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 42px;
+            color: #ff9070;
+            text-shadow: 0 0 18px red;
+        }
+        .final-score {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffdb7e;
+        }
+
+        /* mobile bottom bar */
+        .mobile-bar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(12, 4, 28, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,200,100,0.4);
+            padding: 10px 20px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            justify-content: space-between;
+            align-items: center;
+            z-index: 15;
+        }
+        .mob-stat {
+            text-align: center;
+        }
+        .mob-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #bf8eff;
+        }
+        .mob-score {
+            font-family: 'Fredoka One', cursive;
+            font-size: 28px;
+            color: var(--gold);
+        }
+        .mob-next {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .mob-fruit {
+            font-size: 42px;
+        }
+
+        @media (max-width: 750px) {
+            .info-panel {
+                display: none;
+            }
+            .mobile-bar {
+                display: flex;
+            }
+            .game-hub {
+                padding: 12px;
+                align-items: flex-start;
+            }
+        }
+        @media (min-width: 751px) and (max-width: 1000px) {
+            .info-panel {
+                width: 160px;
+                gap: 12px;
+            }
+            .score-value { font-size: 38px; }
+            .best-value { font-size: 30px; }
+        }
+    </style>
+</head>
+<body>
+<div class="stars" id="starfield"></div>
+<div class="game-hub">
+    <div class="info-panel">
+        <div class="stat-card"><div class="stat-label">🍬 СЧЁТ</div><div class="score-value" id="mainScore">0</div></div>
+        <div class="stat-card"><div class="stat-label">🏆 РЕКОРД</div><div class="best-value" id="mainBest">0</div></div>
+        <div class="stat-card"><div class="stat-label">🍎 СЛЕДУЮЩИЙ</div><div class="next-fruit" id="nextPreview">🍓</div></div>
+        <div class="stat-card"><div class="stat-label">✨ СЛИЯНИЯ</div><div class="legend-list" id="legendList"></div></div>
+        <button class="restart-btn" id="resetBtn">⟳ НОВАЯ ИГРА</button>
+    </div>
+
+    <div class="canvas-wrapper" id="canvasWrap">
+        <canvas id="gameCanvas" width="500" height="700"></canvas>
+        <div class="gameover-pane" id="gameOverlay">
+            <div class="gameover-title">GAME OVER</div>
+            <div class="final-score" id="finalScoreSpan">0 очков</div>
+            <button class="restart-btn" id="overlayReset">СЫГРАТЬ СНОВА</button>
+        </div>
+    </div>
+</div>
+
+<div class="mobile-bar" id="mobileBar">
+    <div class="mob-stat"><div class="mob-label">🍎 СЧЁТ</div><div class="mob-score" id="mobScore">0</div></div>
+    <div class="mob-stat"><div class="mob-label">🏆 РЕКОРД</div><div class="mob-score" id="mobBest">0</div></div>
+    <div class="mob-next"><div class="mob-label">СЛЕДУЮЩИЙ</div><div class="mob-fruit" id="mobNext">🍓</div></div>
+    <button class="restart-btn" id="mobileResetBtn" style="padding: 8px 18px; font-size: 24px;">↺</button>
+</div>
+
+<script>
+    (function(){
+        // ---------- ФРУКТОВАЯ БАЗА ----------
+        const FRUIT_TYPES = [
+            { emoji: '🍓', radiusBase: 14, points: 1, name: 'Клубника' },
+            { emoji: '🍒', radiusBase: 17, points: 3, name: 'Вишня' },
+            { emoji: '🍇', radiusBase: 21, points: 6, name: 'Виноград' },
+            { emoji: '🍋', radiusBase: 25, points: 10, name: 'Лимон' },
+            { emoji: '🍊', radiusBase: 30, points: 15, name: 'Апельсин' },
+            { emoji: '🍎', radiusBase: 35, points: 21, name: 'Яблоко' },
+            { emoji: '🍑', radiusBase: 40, points: 28, name: 'Персик' },
+            { emoji: '🍍', radiusBase: 46, points: 36, name: 'Ананас' },
+            { emoji: '🍈', radiusBase: 52, points: 45, name: 'Дыня' },
+            { emoji: '🍉', radiusBase: 60, points: 55, name: 'Арбуз' },
+            { emoji: '🎃', radiusBase: 72, points: 100, name: 'Тыква' }
+        ];
+
+        let canvas = document.getElementById('gameCanvas');
+        let ctx = canvas.getContext('2d');
+        let gameActive = true;
+        let fruitsArray = [];
+        let currentScore = 0;
+        let highScore = localStorage.getItem('fruitsFusionBest') ? parseInt(localStorage.getItem('fruitsFusionBest')) : 0;
+        let nextFruitIndex = randomFruitIndex();
+        let canShoot = true;
+        let aimX = 0;           // текущая позиция прицела
+        let isPointerDown = false;  // зажат ли палец/мышь
+        let previewX = 0;
+        let particles = [];
+        let shakePower = 0;
+        
+        // динамические размеры и масштабирование
+        let canvasWidth = 500, canvasHeight = 700;
+        let leftWall = 12, rightWall = 0;
+        let groundY = 0;
+        let dangerZoneY = 0;
+        let currentFruitsDB = [];
+
+        // --- ФИЗИЧЕСКИЕ КОНСТАНТЫ (улучшенные) ---
+        const GRAVITY = 0.28;
+        const BOUNCE_DAMP = 0.52;
+        const FRICTION_AIR = 0.992;
+        const COLLISION_STIFF = 0.65;
+        const ROTATION_SPEED = 0.08;
+
+        function randomFruitIndex() {
+            return Math.floor(Math.random() * 5);
+        }
+
+        function recalcDimensions() {
+            const container = document.getElementById('canvasWrap');
+            const maxWidth = Math.min(window.innerWidth - 40, 570);
+            const maxHeight = Math.min(window.innerHeight - (window.innerWidth < 750 ? 120 : 80), 760);
+            let w = Math.min(maxWidth, 550);
+            let h = Math.min(maxHeight, w * 1.45);
+            w = Math.max(320, Math.floor(w));
+            h = Math.max(500, Math.floor(h));
+            canvasWidth = w;
+            canvasHeight = h;
+            canvas.width = w;
+            canvas.height = h;
+            canvas.style.width = `${w}px`;
+            canvas.style.height = `${h}px`;
+            leftWall = 10;
+            rightWall = canvasWidth - 10;
+            groundY = canvasHeight - 12;
+            dangerZoneY = Math.floor(canvasHeight * 0.16);
+            
+            let scaleFactor = Math.min(1.2, (canvasWidth / 480) * 1.0);
+            currentFruitsDB = FRUIT_TYPES.map((f, idx) => ({
+                ...f,
+                radius: Math.max(12, Math.floor(f.radiusBase * (0.7 + scaleFactor * 0.5)))
+            }));
+        }
+
+        function updateUI() {
+            document.getElementById('mainScore').innerText = currentScore;
+            document.getElementById('mainBest').innerText = highScore;
+            document.getElementById('mobScore').innerText = currentScore;
+            document.getElementById('mobBest').innerText = highScore;
+            const nextEmoji = FRUIT_TYPES[nextFruitIndex].emoji;
+            document.getElementById('nextPreview').innerHTML = nextEmoji;
+            document.getElementById('mobNext').innerHTML = nextEmoji;
+        }
+
+        function buildLegend() {
+            const legDiv = document.getElementById('legendList');
+            legDiv.innerHTML = '';
+            FRUIT_TYPES.forEach(f => {
+                let item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `<span style="font-size:22px;">${f.emoji}</span><span>${f.name} +${f.points}</span>`;
+                legDiv.appendChild(item);
+            });
+        }
+
+        // Класс фрукта
+        class Fruit {
+            constructor(x, y, typeIdx, velX = 0, velY = 0) {
+                this.x = x;
+                this.y = y;
+                this.type = typeIdx;
+                this.r = currentFruitsDB[typeIdx].radius;
+                this.vx = velX;
+                this.vy = velY;
+                this.angle = Math.random() * Math.PI * 2;
+                this.angularVel = (Math.random() - 0.5) * 0.12;
+                this.mergeLock = false;
+                this.bornTime = Date.now();
+                this.active = true;
+            }
+            
+            update() {
+                if (!this.active) return;
+                this.vy += GRAVITY;
+                this.vx *= FRICTION_AIR;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.angle += this.angularVel;
+                this.angularVel *= 0.99;
+                
+                if (this.x - this.r < leftWall) {
+                    this.x = leftWall + this.r;
+                    this.vx = -this.vx * 0.65;
+                    if (Math.abs(this.vx) < 0.3) this.vx = 0;
+                }
+                if (this.x + this.r > rightWall) {
+                    this.x = rightWall - this.r;
+                    this.vx = -this.vx * 0.65;
+                }
+                if (this.y + this.r > groundY) {
+                    this.y = groundY - this.r;
+                    this.vy = -this.vy * BOUNCE_DAMP;
+                    if (Math.abs(this.vy) < 1.2 && this.vy > 0) this.vy = 0;
+                    this.vx *= 0.98;
+                    if (Math.abs(this.vy) < 0.4) this.vy = 0;
+                    if (Math.abs(this.vy) > 2.5) shakePower = Math.min(shakePower + 2, 12);
+                }
+                if (this.y - this.r < 2) {
+                    this.y = this.r + 2;
+                    if (this.vy < 0) this.vy = 0;
+                }
+            }
+            
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.shadowColor = "rgba(0,0,0,0.4)";
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(2, 3, this.r-1, 0, Math.PI*2);
+                ctx.fillStyle = "rgba(0,0,0,0.35)";
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.r, 0, Math.PI*2);
+                ctx.fillStyle = "rgba(255,240,180,0.2)";
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(0, 0, this.r-1, 0, Math.PI*2);
+                ctx.fillStyle = "#fff3cf";
+                ctx.fill();
+                ctx.font = `${Math.floor(this.r * 1.6)}px "Segoe UI Emoji", "Apple Color Emoji"`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#1e1a2a";
+                ctx.fillText(currentFruitsDB[this.type].emoji, 0, 2);
+                ctx.restore();
+            }
+        }
+        
+        function addMergeEffect(x, y, fruitType) {
+            for (let i=0; i<24; i++) {
+                let angle = Math.random() * Math.PI * 2;
+                let speed = 2 + Math.random() * 5;
+                particles.push({
+                    x: x, y: y, 
+                    vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+                    life: 0.9, size: 4 + Math.random() * 7,
+                    color: `hsl(${Math.random() * 60 + 20}, 80%, 65%)`,
+                    type: 'glow'
+                });
+            }
+            let nextType = fruitType + 1;
+            if (nextType < currentFruitsDB.length) {
+                let emojiBig = currentFruitsDB[nextType].emoji;
+                for (let i=0;i<12;i++) {
+                    particles.push({
+                        x: x + (Math.random()-0.5)*24, y: y + (Math.random()-0.5)*18,
+                        vx: (Math.random()-0.5)*3, vy: (Math.random()-2)*1.8,
+                        life: 0.75, emoji: emojiBig, size: 18, type: 'emojiSpark'
+                    });
+                }
+            }
+            shakePower = 10;
+        }
+        
+        function handleCollisionsAndMerge() {
+            let mergedHappened = false;
+            for (let i = 0; i < fruitsArray.length; i++) {
+                for (let j = i+1; j < fruitsArray.length; j++) {
+                    const a = fruitsArray[i];
+                    const b = fruitsArray[j];
+                    if (a.mergeLock || b.mergeLock) continue;
+                    const dx = b.x - a.x;
+                    const dy = b.y - a.y;
+                    const dist = Math.hypot(dx, dy);
+                    const minDist = a.r + b.r;
+                    if (dist < minDist) {
+                        if (a.type === b.type && a.type < currentFruitsDB.length - 1 && !a.mergeLock && !b.mergeLock) {
+                            a.mergeLock = true;
+                            b.mergeLock = true;
+                            const midX = (a.x + b.x) / 2;
+                            const midY = (a.y + b.y) / 2;
+                            addMergeEffect(midX, midY, a.type);
+                            const newType = a.type + 1;
+                            const gainedPoints = currentFruitsDB[newType].points;
+                            currentScore += gainedPoints;
+                            if (currentScore > highScore) {
+                                highScore = currentScore;
+                                localStorage.setItem('fruitsFusionBest', highScore);
+                            }
+                            updateUI();
+                            fruitsArray.splice(j, 1);
+                            fruitsArray.splice(i, 1);
+                            let newFruit = new Fruit(midX, midY - 5, newType, (Math.random() - 0.5)*1.6, -2.2);
+                            fruitsArray.push(newFruit);
+                            mergedHappened = true;
+                            break;
+                        } else {
+                            const overlap = minDist - dist;
+                            const angle = Math.atan2(dy, dx);
+                            const pushX = Math.cos(angle) * overlap * 0.55;
+                            const pushY = Math.sin(angle) * overlap * 0.55;
+                            if (!a.mergeLock) { a.x -= pushX; a.y -= pushY; }
+                            if (!b.mergeLock) { b.x += pushX; b.y += pushY; }
+                            const nx = dx / dist;
+                            const ny = dy / dist;
+                            const vrelx = b.vx - a.vx;
+                            const vrely = b.vy - a.vy;
+                            const dot = vrelx * nx + vrely * ny;
+                            if (dot < 0) {
+                                const e = COLLISION_STIFF;
+                                const imp = (1 + e) * dot / 2;
+                                if (!a.mergeLock) { a.vx += imp * nx; a.vy += imp * ny; }
+                                if (!b.mergeLock) { b.vx -= imp * nx; b.vy -= imp * ny; }
+                            }
+                            a.x = Math.max(leftWall + a.r, Math.min(rightWall - a.r, a.x));
+                            b.x = Math.max(leftWall + b.r, Math.min(rightWall - b.r, b.x));
+                        }
+                    }
+                }
+                if (mergedHappened) break;
+            }
+            if (mergedHappened) {
+                handleCollisionsAndMerge();
+            }
+        }
+        
+        function updateParticles() {
+            for (let i=0; i<particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.type !== 'emojiSpark') p.vy += 0.2;
+                p.life -= 0.025;
+                if (p.life <= 0 || p.y > canvasHeight+50) {
+                    particles.splice(i,1);
+                    i--;
+                }
+            }
+        }
+        
+        function drawParticles(ctx) {
+            for (let p of particles) {
+                ctx.save();
+                ctx.globalAlpha = Math.min(1, p.life * 1.2);
+                if (p.type === 'emojiSpark') {
+                    ctx.font = `${Math.floor(p.size)}px "Segoe UI Emoji"`;
+                    ctx.textAlign = "center";
+                    ctx.fillText(p.emoji, p.x, p.y);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2);
+                    ctx.fillStyle = p.color || "#ffcc66";
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+        
+        function checkGameOver() {
+            if (!gameActive) return true;
+            for (let f of fruitsArray) {
+                if (f.y - f.r < dangerZoneY && (Date.now() - f.bornTime > 900)) {
+                    gameActive = false;
+                    document.getElementById('finalScoreSpan').innerHTML = `${currentScore} очков`;
+                    document.getElementById('gameOverlay').classList.add('active');
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function restartGame() {
+            fruitsArray = [];
+            particles = [];
+            currentScore = 0;
+            gameActive = true;
+            canShoot = true;
+            isPointerDown = false;
+            nextFruitIndex = randomFruitIndex();
+            updateUI();
+            document.getElementById('gameOverlay').classList.remove('active');
+            shakePower = 0;
+            // обновляем прицел
+            aimX = canvasWidth / 2;
+            previewX = aimX;
+        }
+        
+        // БРОСОК ПРОИСХОДИТ ПРИ ОТПУСКАНИИ!
+        function dropCurrentFruit(posX) {
+            if (!gameActive || !canShoot) return false;
+            let spawnX = Math.min(rightWall - currentFruitsDB[nextFruitIndex].radius, Math.max(leftWall + currentFruitsDB[nextFruitIndex].radius, posX));
+            let newFrt = new Fruit(spawnX, 28, nextFruitIndex, (Math.random() - 0.5)*0.9, 1.4);
+            fruitsArray.push(newFrt);
+            // меняем следующий фрукт
+            nextFruitIndex = randomFruitIndex();
+            updateUI();
+            canShoot = false;
+            setTimeout(() => { canShoot = true; }, 420);
+            return true;
+        }
+        
+        // отрисовка фона, направляющей и прицельного фрукта (при зажатом пальце)
+        function drawBackground() {
+            const grad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+            grad.addColorStop(0, '#18092e');
+            grad.addColorStop(1, '#2a1245');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            // опасная зона
+            ctx.fillStyle = 'rgba(255, 70, 90, 0.15)';
+            ctx.fillRect(0, 0, canvasWidth, dangerZoneY);
+            ctx.beginPath();
+            ctx.moveTo(0, dangerZoneY);
+            ctx.lineTo(canvasWidth, dangerZoneY);
+            ctx.strokeStyle = '#ff8866';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 8]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            // пол
+            ctx.fillStyle = '#5d3a6e';
+            ctx.fillRect(0, groundY-3, canvasWidth, 6);
+            ctx.fillStyle = '#ffd96630';
+            ctx.fillRect(0, groundY-1, canvasWidth, 3);
+            
+            // рисуем прицельную линию и летящий фрукт только если игра активна и можно бросить
+            if (gameActive && canShoot) {
+                let currentAim = Math.min(rightWall - currentFruitsDB[nextFruitIndex].radius, Math.max(leftWall + currentFruitsDB[nextFruitIndex].radius, aimX));
+                ctx.beginPath();
+                ctx.moveTo(currentAim, 16);
+                ctx.lineTo(currentAim, groundY-15);
+                ctx.strokeStyle = '#ffe5aa';
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([5, 10]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // полупрозрачный силуэт фрукта для предпросмотра (всегда)
+                ctx.globalAlpha = 0.55;
+                ctx.font = `${Math.floor(currentFruitsDB[nextFruitIndex].radius * 1.45)}px "Segoe UI Emoji"`;
+                ctx.textAlign = "center";
+                ctx.fillText(currentFruitsDB[nextFruitIndex].emoji, currentAim, 34);
+                ctx.globalAlpha = 1;
+                
+                // когда палец зажат - добавляем эффект "наведения" (увеличенный прицел)
+                if (isPointerDown) {
+                    ctx.beginPath();
+                    ctx.arc(currentAim, 28, currentFruitsDB[nextFruitIndex].radius + 4, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffcc88';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([4, 6]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    // дополнительный внутренний круг
+                    ctx.beginPath();
+                    ctx.arc(currentAim, 28, currentFruitsDB[nextFruitIndex].radius + 1, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffaa66';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        function animate() {
+            if (!canvas || !ctx) return;
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            drawBackground();
+            
+            if (gameActive) {
+                for (let i=0; i<fruitsArray.length; i++) fruitsArray[i].update();
+                for (let iter=0; iter<3; iter++) handleCollisionsAndMerge();
+                for (let f of fruitsArray) {
+                    f.x = Math.min(rightWall - f.r, Math.max(leftWall + f.r, f.x));
+                    if (f.y + f.r > groundY) f.y = groundY - f.r;
+                }
+                checkGameOver();
+            }
+            for (let f of fruitsArray) f.draw(ctx);
+            drawParticles(ctx);
+            updateParticles();
+            
+            if (shakePower > 0) {
+                let offsetX = (Math.random() - 0.5) * shakePower;
+                let offsetY = (Math.random() - 0.5) * shakePower * 0.7;
+                canvas.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+                shakePower *= 0.85;
+                if (shakePower < 0.3) shakePower = 0;
+            } else {
+                canvas.style.transform = 'translate(0px, 0px)';
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // --- Получение координаты на canvas из события ---
+        function getCanvasCoord(clientX) {
+            const rect = canvas.getBoundingClientRect();
+            let ratioX = canvasWidth / rect.width;
+            let raw = (clientX - rect.left) * ratioX;
+            if (nextFruitIndex !== undefined && currentFruitsDB[nextFruitIndex]) {
+                return Math.min(rightWall - currentFruitsDB[nextFruitIndex].radius, 
+                              Math.max(leftWall + currentFruitsDB[nextFruitIndex].radius, raw));
+            }
+            return Math.min(rightWall - 20, Math.max(leftWall + 20, raw));
+        }
+        
+        // --- ОБРАБОТЧИКИ: отпускание -> бросок! ---
+        function onPointerMove(e) {
+            if (!gameActive) return;
+            const coord = getCanvasCoord(e.clientX);
+            aimX = coord;
+            previewX = aimX;
+        }
+        
+        function onPointerDown(e) {
+            if (!gameActive || !canShoot) return;
+            e.preventDefault();
+            isPointerDown = true;
+            const coord = getCanvasCoord(e.clientX);
+            aimX = coord;
+            previewX = aimX;
+        }
+        
+        function onPointerUp(e) {
+            if (!gameActive || !canShoot) {
+                isPointerDown = false;
+                return;
+            }
+            e.preventDefault();
+            if (isPointerDown) {
+                // БРОСАЕМ ФРУКТ В МОМЕНТ ОТПУСКАНИЯ
+                dropCurrentFruit(aimX);
+            }
+            isPointerDown = false;
+        }
+        
+        // отмена, если указатель уходит за пределы canvas
+        function onPointerCancel(e) {
+            isPointerDown = false;
+        }
+        
+        function resizeAndRefresh() {
+            recalcDimensions();
+            fruitsArray.forEach(f => {
+                f.r = currentFruitsDB[f.type].radius;
+                f.x = Math.min(rightWall - f.r, Math.max(leftWall + f.r, f.x));
+                if (f.y + f.r > groundY) f.y = groundY - f.r;
+            });
+            aimX = Math.min(rightWall - (currentFruitsDB[nextFruitIndex]?.radius || 15), 
+                           Math.max(leftWall + (currentFruitsDB[nextFruitIndex]?.radius || 15), aimX));
+        }
+        
+        function initEvents() {
+            canvas.addEventListener('pointermove', onPointerMove);
+            canvas.addEventListener('pointerdown', onPointerDown);
+            canvas.addEventListener('pointerup', onPointerUp);
+            canvas.addEventListener('pointercancel', onPointerCancel);
+            // защита от контекстного меню
+            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            window.addEventListener('resize', () => {
+                resizeAndRefresh();
+            });
+            document.getElementById('resetBtn').addEventListener('click', () => restartGame());
+            document.getElementById('overlayReset').addEventListener('click', () => restartGame());
+            document.getElementById('mobileResetBtn').addEventListener('click', () => restartGame());
+        }
+        
+        function startGame() {
+            buildLegend();
+            recalcDimensions();
+            initEvents();
+            restartGame();
+            updateUI();
+            aimX = canvasWidth / 2;
+            previewX = aimX;
+            animate();
+            // генерация звезд
+            const starContainer = document.getElementById('starfield');
+            for (let i=0;i<100;i++) {
+                let star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = (Math.random() * 3 + 1) + 'px';
+                star.style.animationDuration = 1.5 + Math.random() * 4 + 's';
+                star.style.animationDelay = Math.random() * 5 + 's';
+                starContainer.appendChild(star);
+            }
+        }
+        
+        startGame();
+    })();
+</script>
+</body>
+</html>
