@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Фруктовое Слияние | Полный обзор</title>
+    <title>Фруктовое Слияние — Следующий фрукт отдельно</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
         
@@ -16,12 +16,8 @@
 
         :root {
             --bg-dark: #0a0518;
-            --bg-glow: #1e0b3a;
             --gold: #ffdd7e;
-            --gold-glow: #ffb347;
             --accent-purple: #b87cff;
-            --fusion: #ff70a6;
-            --shadow-strong: rgba(0, 0, 0, 0.5);
         }
 
         body {
@@ -36,7 +32,6 @@
             height: 100%;
         }
 
-        /* stars animation */
         .stars {
             position: fixed;
             inset: 0;
@@ -55,7 +50,6 @@
             100% { opacity: 0.9; transform: scale(1.2);}
         }
 
-        /* layout container - фикс для полного отображения */
         .game-hub {
             display: flex;
             justify-content: center;
@@ -70,7 +64,6 @@
             overflow: hidden;
         }
 
-        /* desktop sidebar */
         .info-panel {
             width: 200px;
             display: flex;
@@ -86,7 +79,6 @@
             border-radius: 32px;
             padding: 18px 12px;
             text-align: center;
-            transition: 0.2s;
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
         .stat-label {
@@ -149,7 +141,6 @@
             box-shadow: 0 2px 0 0 #5a2a8a;
         }
 
-        /* canvas wrapper - гарантия что низ виден */
         .canvas-wrapper {
             position: relative;
             display: flex;
@@ -157,7 +148,6 @@
             align-items: center;
             flex-shrink: 1;
             min-width: 0;
-            height: auto;
         }
         canvas {
             display: block;
@@ -165,14 +155,13 @@
             box-shadow: 0 20px 35px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(255,215,0,0.2);
             cursor: crosshair;
             background: #110c23;
-            transition: all 0.1s;
-            max-width: 100%;
-            max-height: 100%;
             width: auto;
             height: auto;
+            max-width: 92vw;
+            max-height: 70vh;
+            object-fit: contain;
         }
 
-        /* game over overlay */
         .gameover-pane {
             position: absolute;
             inset: 0;
@@ -205,7 +194,6 @@
             color: #ffdb7e;
         }
 
-        /* mobile bottom bar - более компактная, чтоб не мешала */
         .mobile-bar {
             display: none;
             position: fixed;
@@ -215,8 +203,8 @@
             background: rgba(12, 4, 28, 0.95);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255,200,100,0.4);
-            padding: 8px 16px;
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            padding: 6px 16px;
+            padding-bottom: max(6px, env(safe-area-inset-bottom));
             justify-content: space-between;
             align-items: center;
             z-index: 15;
@@ -243,7 +231,6 @@
             font-size: 36px;
         }
 
-        /* Адаптация: на телефонах всё подстраивается, чтобы низ был виден */
         @media (max-width: 750px) {
             .info-panel {
                 display: none;
@@ -255,20 +242,22 @@
                 padding: 8px;
                 align-items: center;
                 justify-content: center;
+                flex-direction: column;
                 height: 100%;
             }
             .canvas-wrapper {
-                max-height: calc(100% - 70px);
-                margin-bottom: 10px;
+                flex-grow: 1;
+                display: flex;
+                align-items: center;
+                max-height: calc(100% - 75px);
+                margin-top: 5px;
             }
             canvas {
-                max-height: calc(100vh - 100px);
-                width: auto;
-                height: auto;
-                border-radius: 32px;
+                max-height: calc(100vh - 130px);
+                max-width: 95vw;
             }
         }
-        /* планшеты */
+        
         @media (min-width: 751px) and (max-width: 1000px) {
             .info-panel {
                 width: 160px;
@@ -276,14 +265,11 @@
             }
             .score-value { font-size: 38px; }
             .best-value { font-size: 30px; }
-            .game-hub {
-                padding: 12px;
-            }
         }
-        /* очень маленькие экраны до 400px */
+        
         @media (max-width: 480px) {
             .mobile-bar {
-                padding: 5px 12px;
+                padding: 4px 12px;
             }
             .mob-score {
                 font-size: 20px;
@@ -291,9 +277,8 @@
             .mob-fruit {
                 font-size: 28px;
             }
-            .restart-btn {
-                padding: 8px 16px;
-                font-size: 14px;
+            canvas {
+                max-height: calc(100vh - 110px);
             }
         }
     </style>
@@ -323,7 +308,7 @@
     <div class="mob-stat"><div class="mob-label">🍎 СЧЁТ</div><div class="mob-score" id="mobScore">0</div></div>
     <div class="mob-stat"><div class="mob-label">🏆 РЕКОРД</div><div class="mob-score" id="mobBest">0</div></div>
     <div class="mob-next"><div class="mob-label">СЛЕДУЮЩИЙ</div><div class="mob-fruit" id="mobNext">🍓</div></div>
-    <button class="restart-btn" id="mobileResetBtn" style="padding: 8px 18px; font-size: 22px;">↺</button>
+    <button class="restart-btn" id="mobileResetBtn" style="padding: 6px 18px; font-size: 22px;">↺</button>
 </div>
 
 <script>
@@ -348,7 +333,12 @@
         let fruitsArray = [];
         let currentScore = 0;
         let highScore = localStorage.getItem('fruitsFusionBest') ? parseInt(localStorage.getItem('fruitsFusionBest')) : 0;
-        let nextFruitIndex = randomFruitIndex();
+        
+        // currentFruitToDrop - фрукт, который сейчас в прицеле (будет брошен)
+        let currentFruitToDrop = 0;
+        // nextFruitForUI - фрукт, который показывается в окне "Следующий" (следующий после текущего)
+        let nextFruitForUI = 0;
+        
         let canShoot = true;
         let aimX = 0;
         let isPointerDown = false;
@@ -369,37 +359,54 @@
         function randomFruitIndex() {
             return Math.floor(Math.random() * 5);
         }
+        
+        // Генерация двух разных фруктов для текущего и следующего
+        function generateFruitPair() {
+            let first = randomFruitIndex();
+            let second = randomFruitIndex();
+            // Чтобы следующий фрукт не совпадал с текущим (для визуальной наглядности)
+            while (second === first) {
+                second = randomFruitIndex();
+            }
+            return { current: first, next: second };
+        }
 
         function recalcDimensions() {
-            const wrapper = document.getElementById('canvasWrap');
-            const maxWidth = Math.min(window.innerWidth - 40, 600);
+            let baseW = 500;
+            let baseH = 700;
+            const maxWidth = Math.min(window.innerWidth - 40, 560);
             let maxHeight;
             if (window.innerWidth <= 750) {
-                // на телефонах отнимаем высоту мобильной панели и отступы
-                const mobileBarHeight = document.getElementById('mobileBar')?.offsetHeight || 70;
-                maxHeight = window.innerHeight - mobileBarHeight - 20;
+                const mobileBarHeight = 70;
+                maxHeight = window.innerHeight - mobileBarHeight - 30;
             } else {
                 maxHeight = window.innerHeight - 100;
             }
-            maxHeight = Math.min(maxHeight, 760);
-            let w = Math.min(maxWidth, 560);
-            let h = Math.min(maxHeight, w * 1.55);
-            w = Math.max(300, Math.floor(w));
-            h = Math.max(480, Math.floor(h));
+            maxHeight = Math.min(maxHeight, 780);
             
-            canvasWidth = w;
-            canvasHeight = h;
-            canvas.width = w;
-            canvas.height = h;
-            canvas.style.width = `${w}px`;
-            canvas.style.height = `${h}px`;
+            let ratio = baseH / baseW;
+            let newW = Math.min(maxWidth, maxHeight / ratio);
+            let newH = newW * ratio;
+            
+            if (newH > maxHeight) {
+                newH = maxHeight;
+                newW = newH / ratio;
+            }
+            
+            canvasWidth = Math.max(320, Math.floor(newW));
+            canvasHeight = Math.max(560, Math.floor(newH));
+            
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            canvas.style.width = `${canvasWidth}px`;
+            canvas.style.height = `${canvasHeight}px`;
             
             leftWall = 8;
             rightWall = canvasWidth - 8;
-            groundY = canvasHeight - 12;
-            dangerZoneY = Math.floor(canvasHeight * 0.16);
+            groundY = canvasHeight - 14;
+            dangerZoneY = Math.floor(canvasHeight * 0.15);
             
-            let scaleFactor = Math.min(1.2, (canvasWidth / 480) * 0.95);
+            let scaleFactor = Math.min(1.2, (canvasWidth / 480) * 1.0);
             currentFruitsDB = FRUIT_TYPES.map((f, idx) => ({
                 ...f,
                 radius: Math.max(11, Math.floor(f.radiusBase * (0.7 + scaleFactor * 0.55)))
@@ -411,7 +418,9 @@
             document.getElementById('mainBest').innerText = highScore;
             document.getElementById('mobScore').innerText = currentScore;
             document.getElementById('mobBest').innerText = highScore;
-            const nextEmoji = FRUIT_TYPES[nextFruitIndex].emoji;
+            
+            // Окно "Следующий" показывает следующий фрукт (тот, который будет после текущего)
+            const nextEmoji = FRUIT_TYPES[nextFruitForUI].emoji;
             document.getElementById('nextPreview').innerHTML = nextEmoji;
             document.getElementById('mobNext').innerHTML = nextEmoji;
         }
@@ -638,7 +647,12 @@
             gameActive = true;
             canShoot = true;
             isPointerDown = false;
-            nextFruitIndex = randomFruitIndex();
+            
+            // Генерируем начальную пару: текущий фрукт и следующий
+            const pair = generateFruitPair();
+            currentFruitToDrop = pair.current;
+            nextFruitForUI = pair.next;
+            
             updateUI();
             document.getElementById('gameOverlay').classList.remove('active');
             shakePower = 0;
@@ -647,10 +661,19 @@
         
         function dropCurrentFruit(posX) {
             if (!gameActive || !canShoot) return false;
-            let spawnX = Math.min(rightWall - currentFruitsDB[nextFruitIndex].radius, Math.max(leftWall + currentFruitsDB[nextFruitIndex].radius, posX));
-            let newFrt = new Fruit(spawnX, 28, nextFruitIndex, (Math.random() - 0.5)*0.9, 1.4);
+            let spawnX = Math.min(rightWall - currentFruitsDB[currentFruitToDrop].radius, Math.max(leftWall + currentFruitsDB[currentFruitToDrop].radius, posX));
+            let newFrt = new Fruit(spawnX, 28, currentFruitToDrop, (Math.random() - 0.5)*0.9, 1.4);
             fruitsArray.push(newFrt);
-            nextFruitIndex = randomFruitIndex();
+            
+            // После броска: следующий фрукт становится текущим, а для следующего генерируем новый
+            currentFruitToDrop = nextFruitForUI;
+            // Генерируем новый следующий фрукт, стараемся чтобы не совпадал с текущим
+            let newNext = randomFruitIndex();
+            while (newNext === currentFruitToDrop) {
+                newNext = randomFruitIndex();
+            }
+            nextFruitForUI = newNext;
+            
             updateUI();
             canShoot = false;
             setTimeout(() => { canShoot = true; }, 420);
@@ -680,36 +703,52 @@
             ctx.fillStyle = '#ffd96630';
             ctx.fillRect(0, groundY-1, canvasWidth, 3);
             
-            if (gameActive && canShoot && currentFruitsDB[nextFruitIndex]) {
-                let currentAim = Math.min(rightWall - currentFruitsDB[nextFruitIndex].radius, Math.max(leftWall + currentFruitsDB[nextFruitIndex].radius, aimX));
+            // ОТРИСОВКА ПРИЦЕЛЬНОГО ФРУКТА (текущий)
+            if (gameActive && canShoot && currentFruitsDB[currentFruitToDrop]) {
+                let currentAim = Math.min(rightWall - currentFruitsDB[currentFruitToDrop].radius, Math.max(leftWall + currentFruitsDB[currentFruitToDrop].radius, aimX));
+                
+                // Яркая линия прицела
                 ctx.beginPath();
-                ctx.moveTo(currentAim, 16);
+                ctx.moveTo(currentAim, 12);
                 ctx.lineTo(currentAim, groundY-15);
-                ctx.strokeStyle = '#ffe5aa';
-                ctx.lineWidth = 2.5;
-                ctx.setLineDash([5, 10]);
+                ctx.strokeStyle = '#ffdd99';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([6, 8]);
                 ctx.stroke();
                 ctx.setLineDash([]);
                 
-                ctx.globalAlpha = 0.55;
-                ctx.font = `${Math.floor(currentFruitsDB[nextFruitIndex].radius * 1.45)}px "Segoe UI Emoji"`;
-                ctx.textAlign = "center";
-                ctx.fillText(currentFruitsDB[nextFruitIndex].emoji, currentAim, 34);
-                ctx.globalAlpha = 1;
+                // Свечение
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = "#ffaa44";
                 
+                // Рисуем текущий фрукт в прицеле
+                ctx.font = `${Math.floor(currentFruitsDB[currentFruitToDrop].radius * 1.6)}px "Segoe UI Emoji", "Apple Color Emoji"`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "#ff9900";
+                ctx.fillStyle = "#ffffff";
+                ctx.fillText(currentFruitsDB[currentFruitToDrop].emoji, currentAim, 32);
+                
+                ctx.shadowBlur = 0;
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = "#ffcc66";
+                ctx.strokeText(currentFruitsDB[currentFruitToDrop].emoji, currentAim, 32);
+                
+                // Если палец зажат — кружок
                 if (isPointerDown) {
                     ctx.beginPath();
-                    ctx.arc(currentAim, 28, currentFruitsDB[nextFruitIndex].radius + 4, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#ffcc88';
+                    ctx.arc(currentAim, 32, currentFruitsDB[currentFruitToDrop].radius + 6, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffaa55';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([2, 4]);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(currentAim, 32, currentFruitsDB[currentFruitToDrop].radius + 2, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffeeaa';
                     ctx.lineWidth = 2;
-                    ctx.setLineDash([4, 6]);
                     ctx.stroke();
                     ctx.setLineDash([]);
-                    ctx.beginPath();
-                    ctx.arc(currentAim, 28, currentFruitsDB[nextFruitIndex].radius + 1, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#ffaa66';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
                 }
             }
         }
@@ -748,9 +787,9 @@
             const rect = canvas.getBoundingClientRect();
             let ratioX = canvasWidth / rect.width;
             let raw = (clientX - rect.left) * ratioX;
-            if (nextFruitIndex !== undefined && currentFruitsDB[nextFruitIndex]) {
-                return Math.min(rightWall - currentFruitsDB[nextFruitIndex].radius, 
-                              Math.max(leftWall + currentFruitsDB[nextFruitIndex].radius, raw));
+            if (currentFruitToDrop !== undefined && currentFruitsDB[currentFruitToDrop]) {
+                return Math.min(rightWall - currentFruitsDB[currentFruitToDrop].radius, 
+                              Math.max(leftWall + currentFruitsDB[currentFruitToDrop].radius, raw));
             }
             return Math.min(rightWall - 20, Math.max(leftWall + 20, raw));
         }
@@ -788,8 +827,8 @@
                 f.x = Math.min(rightWall - f.r, Math.max(leftWall + f.r, f.x));
                 if (f.y + f.r > groundY) f.y = groundY - f.r;
             });
-            aimX = Math.min(rightWall - (currentFruitsDB[nextFruitIndex]?.radius || 15), 
-                           Math.max(leftWall + (currentFruitsDB[nextFruitIndex]?.radius || 15), aimX));
+            aimX = Math.min(rightWall - (currentFruitsDB[currentFruitToDrop]?.radius || 15), 
+                           Math.max(leftWall + (currentFruitsDB[currentFruitToDrop]?.radius || 15), aimX));
         }
         
         function initEvents() {
