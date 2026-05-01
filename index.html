@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Фруктовое Слияние — Следующий фрукт отдельно</title>
+    <title>Фруктовое Слияние — Магазин скинов (выдвижная панель)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
         
@@ -64,82 +64,130 @@
             overflow: hidden;
         }
 
+        /* десктоп панель */
         .info-panel {
-            width: 200px;
+            width: 240px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 12px;
             backdrop-filter: blur(12px);
             flex-shrink: 0;
+            max-height: 100%;
+            overflow-y: auto;
+            scrollbar-width: thin;
         }
         .stat-card {
             background: rgba(20, 10, 40, 0.65);
             backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 215, 150, 0.3);
             border-radius: 32px;
-            padding: 18px 12px;
+            padding: 12px;
             text-align: center;
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
         .stat-label {
             font-family: 'Fredoka One', cursive;
-            font-size: 14px;
+            font-size: 12px;
             letter-spacing: 2px;
             color: var(--accent-purple);
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .score-value {
             font-family: 'Fredoka One', cursive;
-            font-size: 48px;
+            font-size: 42px;
             color: var(--gold);
             text-shadow: 0 0 12px #ffb34780;
             line-height: 1;
         }
         .best-value {
             font-family: 'Fredoka One', cursive;
-            font-size: 36px;
+            font-size: 32px;
             color: #ffbc6e;
         }
         .next-fruit {
-            font-size: 52px;
+            font-size: 48px;
             filter: drop-shadow(0 0 12px #ffd966);
             background: rgba(0,0,0,0.2);
             border-radius: 60px;
-            padding: 6px;
+            padding: 4px;
         }
-        .legend-list {
+        
+        .shop-card {
+            background: rgba(20, 10, 40, 0.8);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 215, 150, 0.4);
+            border-radius: 24px;
+            padding: 12px;
+        }
+        .shop-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 14px;
+            color: #ffaa66;
+            text-align: center;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        .skin-points {
+            background: rgba(0,0,0,0.5);
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 16px;
+            color: #ffdd77;
+        }
+        .skin-list {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-top: 6px;
+            gap: 8px;
         }
-        .legend-item {
+        .skin-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            background: rgba(255,255,240,0.05);
-            padding: 5px 12px;
-            border-radius: 40px;
-            color: #ffecbb;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid rgba(255,215,150,0.2);
         }
+        .skin-item.active {
+            border-color: #ffcc66;
+            background: rgba(255,200,100,0.2);
+            box-shadow: 0 0 8px #ffaa44;
+        }
+        .skin-preview { font-size: 24px; display: flex; gap: 4px; align-items: center; }
+        .skin-name { font-size: 11px; color: #ffecbb; margin-left: 8px; font-weight: bold; }
+        .skin-actions { display: flex; gap: 8px; align-items: center; }
+        .skin-buy-btn, .skin-select-btn {
+            background: linear-gradient(135deg, #ff7b89, #c35eff);
+            border: none;
+            border-radius: 20px;
+            padding: 4px 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .skin-select-btn { background: #4caf50; }
+        .skin-price { font-size: 12px; color: #ffdd77; font-weight: bold; }
+        .skin-owned-badge { font-size: 18px; color: #6bcb77; }
         .restart-btn {
             background: linear-gradient(145deg, #ff7b89, #c35eff);
             border: none;
             font-family: 'Fredoka One', cursive;
-            font-size: 18px;
-            padding: 12px;
+            font-size: 16px;
+            padding: 10px;
             border-radius: 60px;
             color: white;
             cursor: pointer;
-            box-shadow: 0 5px 0 0 #5a2a8a;
+            box-shadow: 0 4px 0 0 #5a2a8a;
             transition: 0.07s linear;
+            margin-top: 4px;
         }
-        .restart-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 0 #5a2a8a;
-        }
+        .restart-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 0 #5a2a8a; }
 
         .canvas-wrapper {
             position: relative;
@@ -178,22 +226,9 @@
             transition: 0.3s ease;
             z-index: 20;
         }
-        .gameover-pane.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .gameover-title {
-            font-family: 'Fredoka One', cursive;
-            font-size: 42px;
-            color: #ff9070;
-            text-shadow: 0 0 18px red;
-        }
-        .final-score {
-            font-size: 36px;
-            font-weight: bold;
-            color: #ffdb7e;
-        }
+        .gameover-pane.active { opacity: 1; pointer-events: all; }
 
+        /* ========== МОБИЛЬНАЯ ВЫДВИЖНАЯ ПАНЕЛЬ ========== */
         .mobile-bar {
             display: none;
             position: fixed;
@@ -203,83 +238,173 @@
             background: rgba(12, 4, 28, 0.95);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255,200,100,0.4);
-            padding: 6px 16px;
-            padding-bottom: max(6px, env(safe-area-inset-bottom));
+            padding: 8px 12px;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 15;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .mobile-stats {
+            display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 15;
         }
-        .mob-stat {
-            text-align: center;
-        }
-        .mob-label {
-            font-size: 10px;
-            font-weight: bold;
-            color: #bf8eff;
-        }
-        .mob-score {
+        .mob-stat { text-align: center; }
+        .mob-label { font-size: 9px; font-weight: bold; color: #bf8eff; }
+        .mob-score { font-family: 'Fredoka One', cursive; font-size: 22px; color: var(--gold); }
+        .mob-fruit { font-size: 32px; }
+        
+        /* кнопка открытия магазина */
+        .shop-toggle-btn {
+            background: linear-gradient(135deg, #ffaa44, #ff6b6b);
+            border: none;
+            border-radius: 40px;
+            padding: 6px 16px;
+            color: white;
             font-family: 'Fredoka One', cursive;
-            font-size: 24px;
-            color: var(--gold);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
-        .mob-next {
+        
+        /* выдвижная панель магазина */
+        .shop-drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1a0a30, #0d0520);
+            border-top-left-radius: 32px;
+            border-top-right-radius: 32px;
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.6);
+            z-index: 30;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            max-height: 60vh;
             display: flex;
             flex-direction: column;
+            border-top: 1px solid rgba(255,215,150,0.4);
+        }
+        .shop-drawer.open {
+            transform: translateY(0);
+        }
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid rgba(255,215,150,0.3);
+            background: rgba(0,0,0,0.3);
+            border-radius: 32px 32px 0 0;
+        }
+        .drawer-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 20px;
+            color: #ffcc66;
+        }
+        .drawer-points {
+            background: rgba(0,0,0,0.5);
+            border-radius: 30px;
+            padding: 6px 14px;
+            color: #ffdd77;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .close-drawer {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #ffaa66;
+            cursor: pointer;
+            padding: 0 8px;
+        }
+        .drawer-skin-list {
+            overflow-y: auto;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+        .drawer-skin-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.08);
+            border-radius: 28px;
+            padding: 10px 16px;
+            border: 1px solid rgba(255,215,150,0.2);
+        }
+        .drawer-skin-item.active {
+            border-color: #ffcc66;
+            background: rgba(255,200,100,0.15);
+        }
+        .drawer-skin-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .drawer-skin-emoji {
+            font-size: 36px;
+        }
+        .drawer-skin-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffecbb;
+        }
+        .drawer-skin-actions {
+            display: flex;
+            gap: 10px;
             align-items: center;
         }
-        .mob-fruit {
-            font-size: 36px;
+        .drawer-buy-btn, .drawer-select-btn {
+            border: none;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .drawer-buy-btn {
+            background: linear-gradient(135deg, #ff7b89, #c35eff);
+            color: white;
+        }
+        .drawer-select-btn {
+            background: #4caf50;
+            color: white;
+        }
+        .drawer-price {
+            color: #ffdd77;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .drawer-owned {
+            color: #6bcb77;
+            font-size: 20px;
+        }
+        .overlay-blur {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 25;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .overlay-blur.active {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         @media (max-width: 750px) {
-            .info-panel {
-                display: none;
-            }
-            .mobile-bar {
-                display: flex;
-            }
-            .game-hub {
-                padding: 8px;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                height: 100%;
-            }
-            .canvas-wrapper {
-                flex-grow: 1;
-                display: flex;
-                align-items: center;
-                max-height: calc(100% - 75px);
-                margin-top: 5px;
-            }
-            canvas {
-                max-height: calc(100vh - 130px);
-                max-width: 95vw;
-            }
-        }
-        
-        @media (min-width: 751px) and (max-width: 1000px) {
-            .info-panel {
-                width: 160px;
-                gap: 12px;
-            }
-            .score-value { font-size: 38px; }
-            .best-value { font-size: 30px; }
-        }
-        
-        @media (max-width: 480px) {
-            .mobile-bar {
-                padding: 4px 12px;
-            }
-            .mob-score {
-                font-size: 20px;
-            }
-            .mob-fruit {
-                font-size: 28px;
-            }
-            canvas {
-                max-height: calc(100vh - 110px);
-            }
+            .info-panel { display: none; }
+            .mobile-bar { display: flex; }
+            .game-hub { padding: 8px; align-items: center; justify-content: center; flex-direction: column; height: 100%; }
+            .canvas-wrapper { flex-grow: 1; display: flex; align-items: center; max-height: calc(100% - 100px); margin-top: 5px; }
+            canvas { max-height: calc(100vh - 160px); max-width: 95vw; }
         }
     </style>
 </head>
@@ -290,7 +415,10 @@
         <div class="stat-card"><div class="stat-label">🍬 СЧЁТ</div><div class="score-value" id="mainScore">0</div></div>
         <div class="stat-card"><div class="stat-label">🏆 РЕКОРД</div><div class="best-value" id="mainBest">0</div></div>
         <div class="stat-card"><div class="stat-label">🍎 СЛЕДУЮЩИЙ</div><div class="next-fruit" id="nextPreview">🍓</div></div>
-        <div class="stat-card"><div class="stat-label">✨ СЛИЯНИЯ</div><div class="legend-list" id="legendList"></div></div>
+        <div class="shop-card">
+            <div class="shop-title"><span>✨ МАГАЗИН СКИНОВ ✨</span><span class="skin-points" id="skinPointsDisplay">0 🍬</span></div>
+            <div class="skin-list" id="skinShopList"></div>
+        </div>
         <button class="restart-btn" id="resetBtn">⟳ НОВАЯ ИГРА</button>
     </div>
 
@@ -304,41 +432,218 @@
     </div>
 </div>
 
+<!-- МОБИЛЬНАЯ НИЖНЯЯ ПАНЕЛЬ -->
 <div class="mobile-bar" id="mobileBar">
-    <div class="mob-stat"><div class="mob-label">🍎 СЧЁТ</div><div class="mob-score" id="mobScore">0</div></div>
-    <div class="mob-stat"><div class="mob-label">🏆 РЕКОРД</div><div class="mob-score" id="mobBest">0</div></div>
-    <div class="mob-next"><div class="mob-label">СЛЕДУЮЩИЙ</div><div class="mob-fruit" id="mobNext">🍓</div></div>
-    <button class="restart-btn" id="mobileResetBtn" style="padding: 6px 18px; font-size: 22px;">↺</button>
+    <div class="mobile-stats">
+        <div class="mob-stat"><div class="mob-label">🍎 СЧЁТ</div><div class="mob-score" id="mobScore">0</div></div>
+        <div class="mob-stat"><div class="mob-label">🏆 РЕКОРД</div><div class="mob-score" id="mobBest">0</div></div>
+        <div class="mob-stat"><div class="mob-label">СЛЕДУЮЩИЙ</div><div class="mob-fruit" id="mobNext">🍓</div></div>
+        <button class="shop-toggle-btn" id="openShopBtn">🎁 МАГАЗИН</button>
+        <button class="restart-btn" id="mobileResetBtn" style="padding: 6px 16px; font-size: 18px;">↺</button>
+    </div>
+</div>
+
+<!-- ВЫДВИЖНАЯ ПАНЕЛЬ МАГАЗИНА -->
+<div class="overlay-blur" id="shopOverlay"></div>
+<div class="shop-drawer" id="shopDrawer">
+    <div class="drawer-header">
+        <span class="drawer-title">✨ МАГАЗИН СКИНОВ</span>
+        <span class="drawer-points" id="drawerPoints">0 🍬</span>
+        <button class="close-drawer" id="closeShopBtn">✕</button>
+    </div>
+    <div class="drawer-skin-list" id="drawerSkinList"></div>
 </div>
 
 <script>
     (function(){
-        const FRUIT_TYPES = [
-            { emoji: '🍓', radiusBase: 14, points: 1, name: 'Клубника' },
-            { emoji: '🍒', radiusBase: 17, points: 3, name: 'Вишня' },
-            { emoji: '🍇', radiusBase: 21, points: 6, name: 'Виноград' },
-            { emoji: '🍋', radiusBase: 25, points: 10, name: 'Лимон' },
-            { emoji: '🍊', radiusBase: 30, points: 15, name: 'Апельсин' },
-            { emoji: '🍎', radiusBase: 35, points: 21, name: 'Яблоко' },
-            { emoji: '🍑', radiusBase: 40, points: 28, name: 'Персик' },
-            { emoji: '🍍', radiusBase: 46, points: 36, name: 'Ананас' },
-            { emoji: '🍈', radiusBase: 52, points: 45, name: 'Дыня' },
-            { emoji: '🍉', radiusBase: 60, points: 55, name: 'Арбуз' },
-            { emoji: '🎃', radiusBase: 72, points: 100, name: 'Тыква' }
+        // ========== СКИНЫ ==========
+        const SKINS = [
+            { id: 'classic', name: 'Классика', price: 0, emojis: ['🍓','🍒','🍇','🍋','🍊','🍎','🍑','🍍','🍈','🍉','🎃'], unlocked: true },
+            { id: 'veggie', name: 'Овощи', price: 500, emojis: ['🥕','🍅','🥦','🌽','🍆','🥔','🧅','🫑','🥒','🧄','🎃'], unlocked: false },
+            { id: 'berry', name: 'Ягоды', price: 800, emojis: ['🍓','🫐','🍒','🍇','🍉','🍑','🍊','🍋','🍎','🍍','🍈'], unlocked: false },
+            { id: 'magic', name: 'Магия', price: 1500, emojis: ['⭐','🌙','✨','💎','🔥','💧','🌪️','🌈','🌟','⚡','🎃'], unlocked: false }
+        ];
+        
+        let currentSkinId = 'classic';
+        let skinPoints = 0;
+        
+        function loadSkinData() {
+            const savedSkin = localStorage.getItem('fruitSkin');
+            if (savedSkin && SKINS.some(s => s.id === savedSkin)) currentSkinId = savedSkin;
+            const savedUnlocks = localStorage.getItem('unlockedSkins');
+            if (savedUnlocks) {
+                const unlockedArr = JSON.parse(savedUnlocks);
+                SKINS.forEach(skin => { if (unlockedArr.includes(skin.id)) skin.unlocked = true; });
+            }
+            SKINS[0].unlocked = true;
+            const savedPoints = localStorage.getItem('skinPoints');
+            if (savedPoints) skinPoints = parseInt(savedPoints) || 0;
+        }
+        
+        function saveSkinData() {
+            localStorage.setItem('fruitSkin', currentSkinId);
+            localStorage.setItem('unlockedSkins', JSON.stringify(SKINS.filter(s => s.unlocked).map(s => s.id)));
+            localStorage.setItem('skinPoints', skinPoints);
+        }
+        
+        function getCurrentEmoji(typeIndex) {
+            const skin = SKINS.find(s => s.id === currentSkinId);
+            if (skin && skin.emojis[typeIndex]) return skin.emojis[typeIndex];
+            return SKINS[0].emojis[typeIndex];
+        }
+        
+        function addSkinPoints(amount) {
+            skinPoints += amount;
+            saveSkinData();
+            updateAllUI();
+        }
+        
+        function tryBuySkin(skinId, price) {
+            const skin = SKINS.find(s => s.id === skinId);
+            if (!skin || skin.unlocked) return false;
+            if (skinPoints >= price) {
+                skinPoints -= price;
+                skin.unlocked = true;
+                saveSkinData();
+                updateAllUI();
+                return true;
+            }
+            return false;
+        }
+        
+        function selectSkin(skinId) {
+            const skin = SKINS.find(s => s.id === skinId);
+            if (skin && skin.unlocked) {
+                currentSkinId = skinId;
+                saveSkinData();
+                updateAllUI();
+            }
+        }
+        
+        function updateAllUI() {
+            updateDesktopShopUI();
+            updateDrawerShopUI();
+            document.getElementById('skinPointsDisplay').innerText = `${skinPoints} 🍬`;
+            const drawerPoints = document.getElementById('drawerPoints');
+            if (drawerPoints) drawerPoints.innerText = `${skinPoints} 🍬`;
+            // обновляем отображение следующего фрукта
+            if (typeof nextFruitForUI !== 'undefined') {
+                document.getElementById('nextPreview').innerHTML = getCurrentEmoji(nextFruitForUI);
+                document.getElementById('mobNext').innerHTML = getCurrentEmoji(nextFruitForUI);
+            }
+        }
+        
+        function updateDesktopShopUI() {
+            const container = document.getElementById('skinShopList');
+            if (!container) return;
+            container.innerHTML = '';
+            SKINS.forEach(skin => {
+                const item = document.createElement('div');
+                item.className = `skin-item ${skin.unlocked ? 'unlocked' : 'locked'} ${currentSkinId === skin.id ? 'active' : ''}`;
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'skin-preview';
+                previewDiv.innerHTML = skin.emojis.slice(0, 3).join(' ') + '...';
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'skin-name';
+                nameSpan.innerText = skin.name;
+                previewDiv.appendChild(nameSpan);
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'skin-actions';
+                if (skin.unlocked) {
+                    if (currentSkinId === skin.id) {
+                        actionsDiv.innerHTML = '<span class="skin-owned-badge">✓</span>';
+                    } else {
+                        const selectBtn = document.createElement('button');
+                        selectBtn.innerText = 'Выбрать';
+                        selectBtn.className = 'skin-select-btn';
+                        selectBtn.onclick = (e) => { e.stopPropagation(); selectSkin(skin.id); };
+                        actionsDiv.appendChild(selectBtn);
+                    }
+                } else {
+                    const priceSpan = document.createElement('span');
+                    priceSpan.className = 'skin-price';
+                    priceSpan.innerText = `${skin.price} 🍬`;
+                    const buyBtn = document.createElement('button');
+                    buyBtn.innerText = 'Купить';
+                    buyBtn.className = 'skin-buy-btn';
+                    buyBtn.onclick = (e) => { e.stopPropagation(); if(tryBuySkin(skin.id, skin.price)) selectSkin(skin.id); };
+                    actionsDiv.appendChild(priceSpan);
+                    actionsDiv.appendChild(buyBtn);
+                }
+                item.appendChild(previewDiv);
+                item.appendChild(actionsDiv);
+                if (skin.unlocked && currentSkinId !== skin.id) item.onclick = () => selectSkin(skin.id);
+                container.appendChild(item);
+            });
+        }
+        
+        function updateDrawerShopUI() {
+            const container = document.getElementById('drawerSkinList');
+            if (!container) return;
+            container.innerHTML = '';
+            SKINS.forEach(skin => {
+                const item = document.createElement('div');
+                item.className = `drawer-skin-item ${currentSkinId === skin.id ? 'active' : ''}`;
+                const preview = document.createElement('div');
+                preview.className = 'drawer-skin-preview';
+                preview.innerHTML = `<span class="drawer-skin-emoji">${skin.emojis[0]}</span><span class="drawer-skin-name">${skin.name}</span>`;
+                const actions = document.createElement('div');
+                actions.className = 'drawer-skin-actions';
+                if (skin.unlocked) {
+                    if (currentSkinId === skin.id) {
+                        actions.innerHTML = '<span class="drawer-owned">✓</span>';
+                    } else {
+                        const selectBtn = document.createElement('button');
+                        selectBtn.innerText = 'Выбрать';
+                        selectBtn.className = 'drawer-select-btn';
+                        selectBtn.onclick = (e) => { e.stopPropagation(); selectSkin(skin.id); closeDrawer(); };
+                        actions.appendChild(selectBtn);
+                    }
+                } else {
+                    const priceSpan = document.createElement('span');
+                    priceSpan.className = 'drawer-price';
+                    priceSpan.innerText = `${skin.price} 🍬`;
+                    const buyBtn = document.createElement('button');
+                    buyBtn.innerText = 'Купить';
+                    buyBtn.className = 'drawer-buy-btn';
+                    buyBtn.onclick = (e) => { e.stopPropagation(); if(tryBuySkin(skin.id, skin.price)) selectSkin(skin.id); };
+                    actions.appendChild(priceSpan);
+                    actions.appendChild(buyBtn);
+                }
+                item.appendChild(preview);
+                item.appendChild(actions);
+                if (skin.unlocked && currentSkinId !== skin.id) item.onclick = () => { selectSkin(skin.id); closeDrawer(); };
+                container.appendChild(item);
+            });
+        }
+        
+        // Управление выдвижной панелью
+        function openDrawer() {
+            document.getElementById('shopDrawer').classList.add('open');
+            document.getElementById('shopOverlay').classList.add('active');
+        }
+        function closeDrawer() {
+            document.getElementById('shopDrawer').classList.remove('open');
+            document.getElementById('shopOverlay').classList.remove('active');
+        }
+        
+        // ========== ОСНОВНАЯ ИГРА ==========
+        const BASE_FRUITS = [
+            { radiusBase: 14, points: 1 }, { radiusBase: 17, points: 3 }, { radiusBase: 21, points: 6 },
+            { radiusBase: 25, points: 10 }, { radiusBase: 30, points: 15 }, { radiusBase: 35, points: 21 },
+            { radiusBase: 40, points: 28 }, { radiusBase: 46, points: 36 }, { radiusBase: 52, points: 45 },
+            { radiusBase: 60, points: 55 }, { radiusBase: 72, points: 100 }
         ];
 
         let canvas = document.getElementById('gameCanvas');
         let ctx = canvas.getContext('2d');
         let gameActive = true;
         let fruitsArray = [];
-        let currentScore = 0;
+        let currentGameScore = 0;
         let highScore = localStorage.getItem('fruitsFusionBest') ? parseInt(localStorage.getItem('fruitsFusionBest')) : 0;
         
-        // currentFruitToDrop - фрукт, который сейчас в прицеле (будет брошен)
         let currentFruitToDrop = 0;
-        // nextFruitForUI - фрукт, который показывается в окне "Следующий" (следующий после текущего)
         let nextFruitForUI = 0;
-        
         let canShoot = true;
         let aimX = 0;
         let isPointerDown = false;
@@ -356,117 +661,73 @@
         const FRICTION_AIR = 0.992;
         const COLLISION_STIFF = 0.65;
 
-        function randomFruitIndex() {
-            return Math.floor(Math.random() * 5);
-        }
-        
-        // Генерация двух разных фруктов для текущего и следующего
+        function randomFruitIndex() { return Math.floor(Math.random() * 5); }
         function generateFruitPair() {
             let first = randomFruitIndex();
             let second = randomFruitIndex();
-            // Чтобы следующий фрукт не совпадал с текущим (для визуальной наглядности)
-            while (second === first) {
-                second = randomFruitIndex();
-            }
+            while (second === first) second = randomFruitIndex();
             return { current: first, next: second };
         }
 
         function recalcDimensions() {
-            let baseW = 500;
-            let baseH = 700;
+            let baseW = 500, baseH = 700;
             const maxWidth = Math.min(window.innerWidth - 40, 560);
             let maxHeight;
             if (window.innerWidth <= 750) {
-                const mobileBarHeight = 70;
-                maxHeight = window.innerHeight - mobileBarHeight - 30;
+                const mobileBarHeight = 80;
+                maxHeight = window.innerHeight - mobileBarHeight - 20;
             } else {
                 maxHeight = window.innerHeight - 100;
             }
             maxHeight = Math.min(maxHeight, 780);
-            
             let ratio = baseH / baseW;
             let newW = Math.min(maxWidth, maxHeight / ratio);
             let newH = newW * ratio;
-            
-            if (newH > maxHeight) {
-                newH = maxHeight;
-                newW = newH / ratio;
-            }
-            
+            if (newH > maxHeight) { newH = maxHeight; newW = newH / ratio; }
             canvasWidth = Math.max(320, Math.floor(newW));
-            canvasHeight = Math.max(560, Math.floor(newH));
-            
+            canvasHeight = Math.max(500, Math.floor(newH));
             canvas.width = canvasWidth;
             canvas.height = canvasHeight;
             canvas.style.width = `${canvasWidth}px`;
             canvas.style.height = `${canvasHeight}px`;
-            
             leftWall = 8;
             rightWall = canvasWidth - 8;
             groundY = canvasHeight - 14;
             dangerZoneY = Math.floor(canvasHeight * 0.15);
-            
             let scaleFactor = Math.min(1.2, (canvasWidth / 480) * 1.0);
-            currentFruitsDB = FRUIT_TYPES.map((f, idx) => ({
+            currentFruitsDB = BASE_FRUITS.map((f, idx) => ({
                 ...f,
                 radius: Math.max(11, Math.floor(f.radiusBase * (0.7 + scaleFactor * 0.55)))
             }));
         }
 
-        function updateUI() {
-            document.getElementById('mainScore').innerText = currentScore;
+        function updateGameUI() {
+            document.getElementById('mainScore').innerText = currentGameScore;
             document.getElementById('mainBest').innerText = highScore;
-            document.getElementById('mobScore').innerText = currentScore;
+            document.getElementById('mobScore').innerText = currentGameScore;
             document.getElementById('mobBest').innerText = highScore;
-            
-            // Окно "Следующий" показывает следующий фрукт (тот, который будет после текущего)
-            const nextEmoji = FRUIT_TYPES[nextFruitForUI].emoji;
-            document.getElementById('nextPreview').innerHTML = nextEmoji;
-            document.getElementById('mobNext').innerHTML = nextEmoji;
-        }
-
-        function buildLegend() {
-            const legDiv = document.getElementById('legendList');
-            legDiv.innerHTML = '';
-            FRUIT_TYPES.forEach(f => {
-                let item = document.createElement('div');
-                item.className = 'legend-item';
-                item.innerHTML = `<span style="font-size:22px;">${f.emoji}</span><span>${f.name} +${f.points}</span>`;
-                legDiv.appendChild(item);
-            });
+            document.getElementById('nextPreview').innerHTML = getCurrentEmoji(nextFruitForUI);
+            document.getElementById('mobNext').innerHTML = getCurrentEmoji(nextFruitForUI);
         }
 
         class Fruit {
             constructor(x, y, typeIdx, velX = 0, velY = 0) {
-                this.x = x;
-                this.y = y;
-                this.type = typeIdx;
+                this.x = x; this.y = y; this.type = typeIdx;
                 this.r = currentFruitsDB[typeIdx].radius;
-                this.vx = velX;
-                this.vy = velY;
+                this.vx = velX; this.vy = velY;
                 this.angle = Math.random() * Math.PI * 2;
                 this.angularVel = (Math.random() - 0.5) * 0.12;
                 this.mergeLock = false;
                 this.bornTime = Date.now();
             }
-            
             update() {
                 this.vy += GRAVITY;
                 this.vx *= FRICTION_AIR;
-                this.x += this.vx;
-                this.y += this.vy;
+                this.x += this.vx; this.y += this.vy;
                 this.angle += this.angularVel;
                 this.angularVel *= 0.99;
-                
-                if (this.x - this.r < leftWall) {
-                    this.x = leftWall + this.r;
-                    this.vx = -this.vx * 0.65;
-                    if (Math.abs(this.vx) < 0.3) this.vx = 0;
-                }
-                if (this.x + this.r > rightWall) {
-                    this.x = rightWall - this.r;
-                    this.vx = -this.vx * 0.65;
-                }
+                if (this.x - this.r < leftWall) { this.x = leftWall + this.r; this.vx = -this.vx * 0.65; if (Math.abs(this.vx) < 0.3) this.vx = 0; }
+                if (this.x + this.r > rightWall) { this.x = rightWall - this.r; this.vx = -this.vx * 0.65; }
                 if (this.y + this.r > groundY) {
                     this.y = groundY - this.r;
                     this.vy = -this.vy * BOUNCE_DAMP;
@@ -475,61 +736,37 @@
                     if (Math.abs(this.vy) < 0.4) this.vy = 0;
                     if (Math.abs(this.vy) > 2.5) shakePower = Math.min(shakePower + 2, 12);
                 }
-                if (this.y - this.r < 2) {
-                    this.y = this.r + 2;
-                    if (this.vy < 0) this.vy = 0;
-                }
+                if (this.y - this.r < 2) { this.y = this.r + 2; if (this.vy < 0) this.vy = 0; }
             }
-            
             draw(ctx) {
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.angle);
                 ctx.shadowColor = "rgba(0,0,0,0.4)";
                 ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(2, 3, this.r-1, 0, Math.PI*2);
-                ctx.fillStyle = "rgba(0,0,0,0.35)";
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(2, 3, this.r-1, 0, Math.PI*2); ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fill();
                 ctx.shadowBlur = 0;
-                ctx.beginPath();
-                ctx.arc(0, 0, this.r, 0, Math.PI*2);
-                ctx.fillStyle = "rgba(255,240,180,0.2)";
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(0, 0, this.r-1, 0, Math.PI*2);
-                ctx.fillStyle = "#fff3cf";
-                ctx.fill();
-                ctx.font = `${Math.floor(this.r * 1.6)}px "Segoe UI Emoji", "Apple Color Emoji"`;
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
+                ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI*2); ctx.fillStyle = "rgba(255,240,180,0.2)"; ctx.fill();
+                ctx.beginPath(); ctx.arc(0, 0, this.r-1, 0, Math.PI*2); ctx.fillStyle = "#fff3cf"; ctx.fill();
+                ctx.font = `${Math.floor(this.r * 1.6)}px "Segoe UI Emoji"`;
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
                 ctx.fillStyle = "#1e1a2a";
-                ctx.fillText(currentFruitsDB[this.type].emoji, 0, 2);
+                ctx.fillText(getCurrentEmoji(this.type), 0, 2);
                 ctx.restore();
             }
         }
         
         function addMergeEffect(x, y, fruitType) {
-            for (let i=0; i<24; i++) {
+            for (let i=0; i<20; i++) {
                 let angle = Math.random() * Math.PI * 2;
                 let speed = 2 + Math.random() * 5;
-                particles.push({
-                    x: x, y: y, 
-                    vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-                    life: 0.9, size: 4 + Math.random() * 7,
-                    color: `hsl(${Math.random() * 60 + 20}, 80%, 65%)`,
-                    type: 'glow'
-                });
+                particles.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 0.8, size: 4+Math.random()*6, color: `hsl(${Math.random()*60+20},80%,65%)`, type: 'glow' });
             }
             let nextType = fruitType + 1;
             if (nextType < currentFruitsDB.length) {
-                let emojiBig = currentFruitsDB[nextType].emoji;
-                for (let i=0;i<12;i++) {
-                    particles.push({
-                        x: x + (Math.random()-0.5)*24, y: y + (Math.random()-0.5)*18,
-                        vx: (Math.random()-0.5)*3, vy: (Math.random()-2)*1.8,
-                        life: 0.75, emoji: emojiBig, size: 18, type: 'emojiSpark'
-                    });
+                let emojiBig = getCurrentEmoji(nextType);
+                for (let i=0;i<10;i++) {
+                    particles.push({ x: x+(Math.random()-0.5)*24, y: y+(Math.random()-0.5)*18, vx: (Math.random()-0.5)*3, vy: (Math.random()-2)*1.8, life: 0.7, emoji: emojiBig, size: 18, type: 'emojiSpark' });
                 }
             }
             shakePower = 10;
@@ -539,54 +776,37 @@
             let mergedHappened = false;
             for (let i = 0; i < fruitsArray.length; i++) {
                 for (let j = i+1; j < fruitsArray.length; j++) {
-                    const a = fruitsArray[i];
-                    const b = fruitsArray[j];
+                    const a = fruitsArray[i], b = fruitsArray[j];
                     if (a.mergeLock || b.mergeLock) continue;
-                    const dx = b.x - a.x;
-                    const dy = b.y - a.y;
-                    const dist = Math.hypot(dx, dy);
-                    const minDist = a.r + b.r;
+                    const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy), minDist = a.r + b.r;
                     if (dist < minDist) {
                         if (a.type === b.type && a.type < currentFruitsDB.length - 1 && !a.mergeLock && !b.mergeLock) {
-                            a.mergeLock = true;
-                            b.mergeLock = true;
-                            const midX = (a.x + b.x) / 2;
-                            const midY = (a.y + b.y) / 2;
+                            a.mergeLock = b.mergeLock = true;
+                            const midX = (a.x + b.x)/2, midY = (a.y + b.y)/2;
                             addMergeEffect(midX, midY, a.type);
                             const newType = a.type + 1;
                             const gainedPoints = currentFruitsDB[newType].points;
-                            currentScore += gainedPoints;
-                            if (currentScore > highScore) {
-                                highScore = currentScore;
-                                localStorage.setItem('fruitsFusionBest', highScore);
-                            }
-                            updateUI();
-                            fruitsArray.splice(j, 1);
-                            fruitsArray.splice(i, 1);
-                            let newFruit = new Fruit(midX, midY - 5, newType, (Math.random() - 0.5)*1.6, -2.2);
+                            currentGameScore += gainedPoints;
+                            addSkinPoints(gainedPoints);
+                            if (currentGameScore > highScore) { highScore = currentGameScore; localStorage.setItem('fruitsFusionBest', highScore); }
+                            updateGameUI();
+                            fruitsArray.splice(j,1); fruitsArray.splice(i,1);
+                            let newFruit = new Fruit(midX, midY-5, newType, (Math.random()-0.5)*1.6, -2.2);
                             fruitsArray.push(newFruit);
-                            mergedHappened = true;
-                            break;
+                            mergedHappened = true; break;
                         } else {
-                            const overlap = minDist - dist;
-                            const angle = Math.atan2(dy, dx);
-                            const pushX = Math.cos(angle) * overlap * 0.55;
-                            const pushY = Math.sin(angle) * overlap * 0.55;
+                            const overlap = minDist - dist, angle = Math.atan2(dy, dx);
+                            const pushX = Math.cos(angle)*overlap*0.55, pushY = Math.sin(angle)*overlap*0.55;
                             if (!a.mergeLock) { a.x -= pushX; a.y -= pushY; }
                             if (!b.mergeLock) { b.x += pushX; b.y += pushY; }
-                            const nx = dx / dist;
-                            const ny = dy / dist;
-                            const vrelx = b.vx - a.vx;
-                            const vrely = b.vy - a.vy;
-                            const dot = vrelx * nx + vrely * ny;
+                            const nx = dx/dist, ny = dy/dist, vrelx = b.vx - a.vx, vrely = b.vy - a.vy, dot = vrelx*nx + vrely*ny;
                             if (dot < 0) {
-                                const e = COLLISION_STIFF;
-                                const imp = (1 + e) * dot / 2;
-                                if (!a.mergeLock) { a.vx += imp * nx; a.vy += imp * ny; }
-                                if (!b.mergeLock) { b.vx -= imp * nx; b.vy -= imp * ny; }
+                                const imp = (1 + COLLISION_STIFF) * dot / 2;
+                                if (!a.mergeLock) { a.vx += imp*nx; a.vy += imp*ny; }
+                                if (!b.mergeLock) { b.vx -= imp*nx; b.vy -= imp*ny; }
                             }
-                            a.x = Math.max(leftWall + a.r, Math.min(rightWall - a.r, a.x));
-                            b.x = Math.max(leftWall + b.r, Math.min(rightWall - b.r, b.x));
+                            a.x = Math.max(leftWall+a.r, Math.min(rightWall-a.r, a.x));
+                            b.x = Math.max(leftWall+b.r, Math.min(rightWall-b.r, b.x));
                         }
                     }
                 }
@@ -598,21 +818,17 @@
         function updateParticles() {
             for (let i=0; i<particles.length; i++) {
                 let p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
+                p.x += p.vx; p.y += p.vy;
                 if (p.type !== 'emojiSpark') p.vy += 0.2;
                 p.life -= 0.025;
-                if (p.life <= 0 || p.y > canvasHeight+50) {
-                    particles.splice(i,1);
-                    i--;
-                }
+                if (p.life <= 0 || p.y > canvasHeight+50) { particles.splice(i,1); i--; }
             }
         }
         
         function drawParticles(ctx) {
             for (let p of particles) {
                 ctx.save();
-                ctx.globalAlpha = Math.min(1, p.life * 1.2);
+                ctx.globalAlpha = Math.min(1, p.life*1.2);
                 if (p.type === 'emojiSpark') {
                     ctx.font = `${Math.floor(p.size)}px "Segoe UI Emoji"`;
                     ctx.textAlign = "center";
@@ -632,7 +848,7 @@
             for (let f of fruitsArray) {
                 if (f.y - f.r < dangerZoneY && (Date.now() - f.bornTime > 900)) {
                     gameActive = false;
-                    document.getElementById('finalScoreSpan').innerHTML = `${currentScore} очков`;
+                    document.getElementById('finalScoreSpan').innerHTML = `${currentGameScore} очков`;
                     document.getElementById('gameOverlay').classList.add('active');
                     return true;
                 }
@@ -643,17 +859,14 @@
         function restartGame() {
             fruitsArray = [];
             particles = [];
-            currentScore = 0;
+            currentGameScore = 0;
             gameActive = true;
             canShoot = true;
             isPointerDown = false;
-            
-            // Генерируем начальную пару: текущий фрукт и следующий
             const pair = generateFruitPair();
             currentFruitToDrop = pair.current;
             nextFruitForUI = pair.next;
-            
-            updateUI();
+            updateGameUI();
             document.getElementById('gameOverlay').classList.remove('active');
             shakePower = 0;
             aimX = canvasWidth / 2;
@@ -662,92 +875,46 @@
         function dropCurrentFruit(posX) {
             if (!gameActive || !canShoot) return false;
             let spawnX = Math.min(rightWall - currentFruitsDB[currentFruitToDrop].radius, Math.max(leftWall + currentFruitsDB[currentFruitToDrop].radius, posX));
-            let newFrt = new Fruit(spawnX, 28, currentFruitToDrop, (Math.random() - 0.5)*0.9, 1.4);
+            let newFrt = new Fruit(spawnX, 28, currentFruitToDrop, (Math.random()-0.5)*0.9, 1.4);
             fruitsArray.push(newFrt);
-            
-            // После броска: следующий фрукт становится текущим, а для следующего генерируем новый
             currentFruitToDrop = nextFruitForUI;
-            // Генерируем новый следующий фрукт, стараемся чтобы не совпадал с текущим
             let newNext = randomFruitIndex();
-            while (newNext === currentFruitToDrop) {
-                newNext = randomFruitIndex();
-            }
+            while (newNext === currentFruitToDrop) newNext = randomFruitIndex();
             nextFruitForUI = newNext;
-            
-            updateUI();
+            updateGameUI();
             canShoot = false;
             setTimeout(() => { canShoot = true; }, 420);
             return true;
         }
         
         function drawBackground() {
-            const grad = ctx.createLinearGradient(0, 0, 0, canvasHeight);
-            grad.addColorStop(0, '#18092e');
-            grad.addColorStop(1, '#2a1245');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            const grad = ctx.createLinearGradient(0,0,0,canvasHeight);
+            grad.addColorStop(0,'#18092e'); grad.addColorStop(1,'#2a1245');
+            ctx.fillStyle = grad; ctx.fillRect(0,0,canvasWidth,canvasHeight);
+            ctx.fillStyle = 'rgba(255,70,90,0.15)'; ctx.fillRect(0,0,canvasWidth,dangerZoneY);
+            ctx.beginPath(); ctx.moveTo(0,dangerZoneY); ctx.lineTo(canvasWidth,dangerZoneY);
+            ctx.strokeStyle = '#ff8866'; ctx.lineWidth=2; ctx.setLineDash([8,8]); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = '#5d3a6e'; ctx.fillRect(0,groundY-3,canvasWidth,6);
+            ctx.fillStyle = '#ffd96630'; ctx.fillRect(0,groundY-1,canvasWidth,3);
             
-            ctx.fillStyle = 'rgba(255, 70, 90, 0.15)';
-            ctx.fillRect(0, 0, canvasWidth, dangerZoneY);
-            ctx.beginPath();
-            ctx.moveTo(0, dangerZoneY);
-            ctx.lineTo(canvasWidth, dangerZoneY);
-            ctx.strokeStyle = '#ff8866';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([8, 8]);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            ctx.fillStyle = '#5d3a6e';
-            ctx.fillRect(0, groundY-3, canvasWidth, 6);
-            ctx.fillStyle = '#ffd96630';
-            ctx.fillRect(0, groundY-1, canvasWidth, 3);
-            
-            // ОТРИСОВКА ПРИЦЕЛЬНОГО ФРУКТА (текущий)
             if (gameActive && canShoot && currentFruitsDB[currentFruitToDrop]) {
                 let currentAim = Math.min(rightWall - currentFruitsDB[currentFruitToDrop].radius, Math.max(leftWall + currentFruitsDB[currentFruitToDrop].radius, aimX));
-                
-                // Яркая линия прицела
-                ctx.beginPath();
-                ctx.moveTo(currentAim, 12);
-                ctx.lineTo(currentAim, groundY-15);
-                ctx.strokeStyle = '#ffdd99';
-                ctx.lineWidth = 3;
-                ctx.setLineDash([6, 8]);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // Свечение
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = "#ffaa44";
-                
-                // Рисуем текущий фрукт в прицеле
-                ctx.font = `${Math.floor(currentFruitsDB[currentFruitToDrop].radius * 1.6)}px "Segoe UI Emoji", "Apple Color Emoji"`;
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = "#ff9900";
+                ctx.beginPath(); ctx.moveTo(currentAim,12); ctx.lineTo(currentAim,groundY-15);
+                ctx.strokeStyle = '#ffdd99'; ctx.lineWidth=3; ctx.setLineDash([6,8]); ctx.stroke(); ctx.setLineDash([]);
+                ctx.shadowBlur = 20; ctx.shadowColor = "#ffaa44";
+                ctx.font = `${Math.floor(currentFruitsDB[currentFruitToDrop].radius * 1.6)}px "Segoe UI Emoji"`;
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.shadowBlur = 15; ctx.shadowColor = "#ff9900";
                 ctx.fillStyle = "#ffffff";
-                ctx.fillText(currentFruitsDB[currentFruitToDrop].emoji, currentAim, 32);
-                
+                ctx.fillText(getCurrentEmoji(currentFruitToDrop), currentAim, 32);
                 ctx.shadowBlur = 0;
-                ctx.lineWidth = 1.5;
-                ctx.strokeStyle = "#ffcc66";
-                ctx.strokeText(currentFruitsDB[currentFruitToDrop].emoji, currentAim, 32);
-                
-                // Если палец зажат — кружок
+                ctx.lineWidth = 1.5; ctx.strokeStyle = "#ffcc66";
+                ctx.strokeText(getCurrentEmoji(currentFruitToDrop), currentAim, 32);
                 if (isPointerDown) {
-                    ctx.beginPath();
-                    ctx.arc(currentAim, 32, currentFruitsDB[currentFruitToDrop].radius + 6, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#ffaa55';
-                    ctx.lineWidth = 3;
-                    ctx.setLineDash([2, 4]);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(currentAim, 32, currentFruitsDB[currentFruitToDrop].radius + 2, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#ffeeaa';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+                    ctx.beginPath(); ctx.arc(currentAim,32,currentFruitsDB[currentFruitToDrop].radius+6,0,Math.PI*2);
+                    ctx.strokeStyle='#ffaa55'; ctx.lineWidth=3; ctx.setLineDash([2,4]); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(currentAim,32,currentFruitsDB[currentFruitToDrop].radius+2,0,Math.PI*2);
+                    ctx.strokeStyle='#ffeeaa'; ctx.lineWidth=2; ctx.stroke();
                     ctx.setLineDash([]);
                 }
             }
@@ -755,112 +922,71 @@
         
         function animate() {
             if (!canvas || !ctx) return;
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.clearRect(0,0,canvasWidth,canvasHeight);
             drawBackground();
-            
             if (gameActive) {
-                for (let i=0; i<fruitsArray.length; i++) fruitsArray[i].update();
-                for (let iter=0; iter<3; iter++) handleCollisionsAndMerge();
+                for (let f of fruitsArray) f.update();
+                for (let iter=0;iter<3;iter++) handleCollisionsAndMerge();
                 for (let f of fruitsArray) {
-                    f.x = Math.min(rightWall - f.r, Math.max(leftWall + f.r, f.x));
-                    if (f.y + f.r > groundY) f.y = groundY - f.r;
+                    f.x = Math.min(rightWall-f.r, Math.max(leftWall+f.r, f.x));
+                    if (f.y+f.r > groundY) f.y = groundY-f.r;
                 }
                 checkGameOver();
             }
             for (let f of fruitsArray) f.draw(ctx);
             drawParticles(ctx);
             updateParticles();
-            
             if (shakePower > 0) {
-                let offsetX = (Math.random() - 0.5) * shakePower;
-                let offsetY = (Math.random() - 0.5) * shakePower * 0.7;
-                canvas.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+                let offX = (Math.random()-0.5)*shakePower, offY = (Math.random()-0.5)*shakePower*0.7;
+                canvas.style.transform = `translate(${offX}px, ${offY}px)`;
                 shakePower *= 0.85;
                 if (shakePower < 0.3) shakePower = 0;
-            } else {
-                canvas.style.transform = 'translate(0px, 0px)';
-            }
+            } else canvas.style.transform = 'translate(0px,0px)';
             requestAnimationFrame(animate);
         }
         
         function getCanvasCoord(clientX) {
             const rect = canvas.getBoundingClientRect();
-            let ratioX = canvasWidth / rect.width;
-            let raw = (clientX - rect.left) * ratioX;
+            let raw = (clientX - rect.left) * (canvasWidth / rect.width);
             if (currentFruitToDrop !== undefined && currentFruitsDB[currentFruitToDrop]) {
-                return Math.min(rightWall - currentFruitsDB[currentFruitToDrop].radius, 
-                              Math.max(leftWall + currentFruitsDB[currentFruitToDrop].radius, raw));
+                return Math.min(rightWall - currentFruitsDB[currentFruitToDrop].radius, Math.max(leftWall + currentFruitsDB[currentFruitToDrop].radius, raw));
             }
-            return Math.min(rightWall - 20, Math.max(leftWall + 20, raw));
-        }
-        
-        function onPointerMove(e) {
-            if (!gameActive) return;
-            aimX = getCanvasCoord(e.clientX);
-        }
-        
-        function onPointerDown(e) {
-            if (!gameActive || !canShoot) return;
-            e.preventDefault();
-            isPointerDown = true;
-            aimX = getCanvasCoord(e.clientX);
-        }
-        
-        function onPointerUp(e) {
-            if (!gameActive || !canShoot) {
-                isPointerDown = false;
-                return;
-            }
-            e.preventDefault();
-            if (isPointerDown) {
-                dropCurrentFruit(aimX);
-            }
-            isPointerDown = false;
-        }
-        
-        function onPointerCancel(e) { isPointerDown = false; }
-        
-        function resizeAndRefresh() {
-            recalcDimensions();
-            fruitsArray.forEach(f => {
-                f.r = currentFruitsDB[f.type].radius;
-                f.x = Math.min(rightWall - f.r, Math.max(leftWall + f.r, f.x));
-                if (f.y + f.r > groundY) f.y = groundY - f.r;
-            });
-            aimX = Math.min(rightWall - (currentFruitsDB[currentFruitToDrop]?.radius || 15), 
-                           Math.max(leftWall + (currentFruitsDB[currentFruitToDrop]?.radius || 15), aimX));
+            return Math.min(rightWall-20, Math.max(leftWall+20, raw));
         }
         
         function initEvents() {
-            canvas.addEventListener('pointermove', onPointerMove);
-            canvas.addEventListener('pointerdown', onPointerDown);
-            canvas.addEventListener('pointerup', onPointerUp);
-            canvas.addEventListener('pointercancel', onPointerCancel);
-            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-            window.addEventListener('resize', () => { setTimeout(resizeAndRefresh, 30); });
-            document.getElementById('resetBtn').addEventListener('click', () => restartGame());
-            document.getElementById('overlayReset').addEventListener('click', () => restartGame());
-            document.getElementById('mobileResetBtn').addEventListener('click', () => restartGame());
+            canvas.addEventListener('pointermove', e => { if(gameActive) aimX = getCanvasCoord(e.clientX); });
+            canvas.addEventListener('pointerdown', e => { if(gameActive && canShoot) { e.preventDefault(); isPointerDown=true; aimX = getCanvasCoord(e.clientX); } });
+            canvas.addEventListener('pointerup', e => { if(gameActive && canShoot && isPointerDown) { e.preventDefault(); dropCurrentFruit(aimX); } isPointerDown=false; });
+            canvas.addEventListener('pointercancel', () => isPointerDown=false);
+            canvas.addEventListener('contextmenu', e=>e.preventDefault());
+            window.addEventListener('resize', () => setTimeout(()=>{ recalcDimensions(); restartGame(); },30));
+            document.getElementById('resetBtn').onclick = () => restartGame();
+            document.getElementById('overlayReset').onclick = () => restartGame();
+            document.getElementById('mobileResetBtn').onclick = () => restartGame();
+            document.getElementById('openShopBtn').onclick = () => openDrawer();
+            document.getElementById('closeShopBtn').onclick = () => closeDrawer();
+            document.getElementById('shopOverlay').onclick = () => closeDrawer();
         }
         
         function startGame() {
-            buildLegend();
+            loadSkinData();
             recalcDimensions();
             initEvents();
             restartGame();
-            updateUI();
-            aimX = canvasWidth / 2;
+            updateGameUI();
+            updateAllUI();
+            aimX = canvasWidth/2;
             animate();
-            const starContainer = document.getElementById('starfield');
-            for (let i=0;i<90;i++) {
+            for(let i=0;i<90;i++) {
                 let star = document.createElement('div');
                 star.classList.add('star');
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.width = star.style.height = (Math.random() * 3 + 1) + 'px';
-                star.style.animationDuration = 1.5 + Math.random() * 4 + 's';
-                star.style.animationDelay = Math.random() * 5 + 's';
-                starContainer.appendChild(star);
+                star.style.left = Math.random()*100+'%';
+                star.style.top = Math.random()*100+'%';
+                star.style.width = star.style.height = (Math.random()*3+1)+'px';
+                star.style.animationDuration = 1.5+Math.random()*4+'s';
+                star.style.animationDelay = Math.random()*5+'s';
+                document.getElementById('starfield').appendChild(star);
             }
         }
         startGame();
